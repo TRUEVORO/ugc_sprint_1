@@ -1,0 +1,69 @@
+@startuml movies-c2
+!theme C4_violet from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+
+!include DEVICONS/postgresql.puml
+!include DEVICONS/redis.puml
+!include <elastic/elasticsearch/elasticsearch>
+!include FONTAWESOME/users.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(admin, "Admin", $sprite="person")
+Person(users, "Customers", $sprite="users")
+
+System_Boundary(admin_panel, "Admin Panel") {
+    Container(movies_admin, "Movies Admin", "Django app", $descr="Allows admin to manage Movies Database")
+    Container(admin_nginx, "Nginx")
+    ContainerDb(movies_db, "Movies Database", "PostgresSQL", $sprite="postgresql")
+
+    Rel_R(admin_nginx, movies_admin, "Uses")
+    Rel_R(movies_admin, movies_db, "Reads/Writes")
+
+    Rel(admin, admin_nginx, "Uses", "REST API")
+}
+
+System_Boundary(auth, "Auth") {
+    Container(auth_app, "Auth", "Flask app", $descr="Allows users to access/manage their accounts")
+    Container(auth_nginx, "Nginx")
+
+    ContainerDb(auth_db, "Auth Database", "PostgresSQL", $sprite="postgresql")
+    ContainerDb(auth_redis, "JWT Blocklist", "Redis", $sprite="redis")
+    ContainerDb(auth_jaeger, "Tracer", "Jaeger")
+
+    Rel_R(auth_nginx, auth_app, "Uses")
+    Rel_R(auth_app, auth_db, "Reads/Writes")
+    Rel_U(auth_app, auth_jaeger, "Tracing")
+    Rel_D(auth_app, auth_redis, "Reads/Writes")
+
+    Rel(admin, auth_nginx, "Uses", "REST API")
+    Rel(users, auth_nginx, "Uses", "REST API")
+}
+
+System_Boundary(movies, "Movies") {
+    System_Boundary(search, "Full-text search"){
+        Container(etl, "ETL", "Python app", $descr="ETL process with data from Movies Database to Elasticsearch")
+
+        ContainerDb(etl_es, "Movies Search", "Elasticsearch", $sprite="elasticsearch")
+        ContainerDb(etl_redis, "State Storage", "Redis", $sprite="redis")
+
+        Rel(etl, etl_es, "Reads/Writes")
+        Rel(etl, etl_redis, "Reads/Writes")
+    }
+
+    Container(movies_app, "Movies", "FastAPI app", $descr="Allows users to retrieve movies/persons/genres")
+
+    ContainerDb(movies_redis, "Cache", "Redis", $sprite="redis")
+
+    Rel(users, movies_app, "Uses", "REST API")
+    Rel(movies_app, auth_app, "Uses", "GRPC")
+    Rel(movies_app, etl_es, "Reads")
+    Rel(movies_app, movies_redis, "Reads")
+}
+
+@enduml
