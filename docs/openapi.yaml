@@ -1,0 +1,127 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "ugc",
+        "description": "User movie progress view",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/<{movie_id}:UUID>/view_progress": {
+            "post": {
+                "tags": [
+                    "view"
+                ],
+                "summary": "Message about watching the film",
+                "description": "Message about watching the film",
+                "operationId": "view_progress_api_v1___movie_id__UUID__view_progress_post",
+                "parameters": [
+                    {
+                        "description": "parameter - movie id",
+                        "required": true,
+                        "schema": {
+                            "title": "movie id",
+                            "type": "string",
+                            "description": "parameter - movie id",
+                            "format": "uuid"
+                        },
+                        "name": "movie_id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "parameter - user id",
+                        "required": true,
+                        "schema": {
+                            "title": "user id",
+                            "type": "string",
+                            "description": "parameter - user id",
+                            "format": "uuid"
+                        },
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "description": "parameter - viewed frame",
+                        "required": true,
+                        "schema": {
+                            "title": "value",
+                            "type": "integer",
+                            "description": "parameter - viewed frame"
+                        },
+                        "name": "viewed_frame",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": { }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        }
+                    }
+                }
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        }
+                    },
+                    "msg": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error Type",
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
