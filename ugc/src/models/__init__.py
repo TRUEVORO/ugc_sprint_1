@@ -1,3 +1,3 @@
-from .viev_progress import ViewProgressDto
+from .viev_progress import ViewProgressDto, ViewProgressRequest
 
-__all__ = ('ViewProgressDto',)
+__all__ = ('ViewProgressDto', 'ViewProgressRequest')
