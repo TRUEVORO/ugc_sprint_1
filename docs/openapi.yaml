@@ -6,57 +6,30 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/v1/<{movie_id}:UUID>/view_progress": {
+        "/api/v1/view_progress": {
             "post": {
                 "tags": [
                     "view"
                 ],
                 "summary": "Message about watching the film",
                 "description": "Message about watching the film",
-                "operationId": "view_progress_api_v1___movie_id__UUID__view_progress_post",
-                "parameters": [
-                    {
-                        "description": "parameter - movie id",
-                        "required": true,
-                        "schema": {
-                            "title": "movie id",
-                            "type": "string",
-                            "description": "parameter - movie id",
-                            "format": "uuid"
-                        },
-                        "name": "movie_id",
-                        "in": "path"
+                "operationId": "view_progress_api_v1_view_progress_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ViewProgressRequest"
+                            }
+                        }
                     },
-                    {
-                        "description": "parameter - user id",
-                        "required": true,
-                        "schema": {
-                            "title": "user id",
-                            "type": "string",
-                            "description": "parameter - user id",
-                            "format": "uuid"
-                        },
-                        "name": "user_id",
-                        "in": "query"
-                    },
-                    {
-                        "description": "parameter - viewed frame",
-                        "required": true,
-                        "schema": {
-                            "title": "value",
-                            "type": "integer",
-                            "description": "parameter - viewed frame"
-                        },
-                        "name": "viewed_frame",
-                        "in": "query"
-                    }
-                ],
+                    "required": true
+                },
                 "responses": {
                     "200": {
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": { }
+                                "schema": {}
                             }
                         }
                     },
@@ -121,6 +94,32 @@
                         "type": "string"
                     }
                 }
+            },
+            "ViewProgressRequest": {
+                "title": "ViewProgressRequest",
+                "required": [
+                    "movie_id",
+                    "user_id",
+                    "viewed_frame"
+                ],
+                "type": "object",
+                "properties": {
+                    "movie_id": {
+                        "title": "Movie Id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_id": {
+                        "title": "User Id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "viewed_frame": {
+                        "title": "Viewed Frame",
+                        "type": "integer"
+                    }
+                },
+                "description": "View progress request body."
             }
         }
     }

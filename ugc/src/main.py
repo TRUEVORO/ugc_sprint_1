@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 import uvicorn
 from aiokafka import AIOKafkaProducer
@@ -9,6 +10,20 @@ from api.v1 import view_router
 from brokers import KafkaProducer, kafka_broker
 from core import LOGGING, settings
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # noqa
+    aio_kafka_producer: AIOKafkaProducer = AIOKafkaProducer(
+        bootstrap_servers=settings.kafka_dsn.removeprefix('kafka://')
+    )
+    await aio_kafka_producer.start()
+    kafka_broker.kafka_producer = KafkaProducer(aio_kafka_producer)
+
+    yield
+
+    await kafka_broker.kafka_producer.producer.stop()
+
+
 app = FastAPI(
     title=settings.project_name,
     docs_url='/api/openapi',
@@ -16,23 +31,8 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     description='User movie progress view',
     version='1.0.0',
+    lifespan=lifespan,
 )
-
-
-@app.on_event('startup')
-async def startup():
-    aio_kafka_producer: AIOKafkaProducer = AIOKafkaProducer(
-        bootstrap_servers=settings.kafka_dsn.removeprefix('kafka://')
-    )
-    await aio_kafka_producer.start()
-
-    kafka_broker.kafka_producer = KafkaProducer(aio_kafka_producer)
-
-
-@app.on_event('shutdown')
-async def shutdown():
-    await kafka_broker.kafka_producer.producer.stop()
-
 
 app.include_router(view_router)
 
