@@ -7,9 +7,9 @@ from pydantic import AnyUrl
 def make_post_request():
     """Provides a function for making POST requests using the aiohttp session."""
 
-    async def inner(url: AnyUrl, request_body) -> tuple[any, int]:
+    async def inner(url: AnyUrl, request_body: bytes) -> tuple[any, int]:
         async with ClientSession() as session:
-            async with session.post(url, data=request_body) as response:
+            async with session.post(url, json=request_body) as response:
                 return await response.json(), response.status
 
     return inner
